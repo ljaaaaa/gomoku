@@ -1,3 +1,5 @@
+package lilja.kiiski.gomoku;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,29 +11,29 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ClientHandler implements Runnable{
-	private Socket client;
+	private Socket socket;
 	private BufferedReader br;
 	private BufferedWriter bw;
 
 	public Thread thread;
-	public String name = "No Name";
 	public String score = "0";
 
-	public boolean nameSet = false;
-	public boolean scoreSet = false;
+	public Square[] grid;
+	public boolean gridSet = false;
+
 	public Lock lock = new ReentrantLock();
 	public Condition nameSetUp = lock.newCondition();
 
 	public Server server;
 	public int clientNum;
 
-	public ClientHandler(int clientNum, Server server, Socket clientSocket) throws IOException{
-		this.client = clientSocket;
+	public ClientHandler(int clientNum, Server server, Socket socket) throws IOException{
+		this.socket = socket;
 		this.server = server;
 		this.clientNum = clientNum;
 
-		br = new BufferedReader(new InputStreamReader(client.getInputStream()));
-		bw = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+		br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 		thread = new Thread(this, name);
 	}
 
@@ -44,32 +46,6 @@ public class ClientHandler implements Runnable{
 				if (msgFromClient == null) { //Server has disconnected
 					break;
 				}
-
-				else if (msgFromClient.contains("NAME:")) { //Username
-					name = msgFromClient.substring(5);
-
-					try {
-						lock.lock();
-						nameSet = true;
-						nameSetUp.signalAll();
-					} finally {
-						lock.unlock();
-					}
-				} else if (msgFromClient.contains("SCORE:")) { //Score at end of game
-					score = msgFromClient.substring(6);
-
-					try {
-						server.lock.lock();
-						server.scores[clientNum] = score; //Updates clients score onto score sheet
-
-						if (server.scores[0] != null && server.scores[1] != null) { //If both scores have been given (not null)
-							server.scoresSent = true;
-							server.allScoresReceived.signalAll();
-						}
-					} finally {
-						server.lock.unlock();
-					}
-				}
 			}
 			client.close();
 			br.close();
@@ -80,10 +56,10 @@ public class ClientHandler implements Runnable{
 		}
 	}
 
-	public void sendMessage(String msg) throws IOException{
+	public void sendMessage(String message) throws IOException{
 		bw.write(msg);
 		bw.newLine();
 		bw.flush();
-		System.out.println("Message sent to " + name + ": " + msg);
+		System.out.println("MESSAGE SENT TO: " + name + ": " + message);
 	}
 }
