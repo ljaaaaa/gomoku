@@ -1,28 +1,28 @@
 package lilja.kiiski.gomoku;
 
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.Scanner;
+import java.io.IOException;
 
 public class Main implements ActionListener {
 	//Constants
-	final int WIDTH = 855;
-	final int HEIGHT = 855;
+	public final int WIDTH = 855;
+	public final int HEIGHT = 855;
 	
 	//Visual
-	JButton[][] grid = new JButton[19][19];
-	JFrame frame;
+	public JButton[][] grid = new JButton[19][19];
+	public JFrame frame;
 
 	//Networking
-	Lock lock = new ReentrantLock();
-    	Condition clientInitialized = lock.newCondition();
-    	Condition sentMessage = lock.newCondition();
+	public Lock lock = new ReentrantLock();
+	public Client client;
 
-	Client client;
+	//Game
+	public boolean myTurn = false;
 
 	public static void main(String[] args) {
 		Main main = new Main();
@@ -41,52 +41,46 @@ public class Main implements ActionListener {
 		for (int x = 0; x < grid.length; x++){
                         for (int y = 0; y < grid[x].length; y++){
                                 if (e.getSource() == grid[x][y]){
-					grid[x][y].setText("x");
-					frame.setTitle("you clicked!");
+				
+					lock.lock();	
+					if (myTurn){ //!!! lock here too
+						grid[x][y].setText("x");
+						grid[x][y].removeActionListener(this);
+	                                        frame.setTitle("Waiting...");
+					}
+					lock.unlock();	
+					client.sendMessage("TURN DONE");
+					client.sendMessage(String.valueOf(x);
+					client.sendMessage(String.valueOf(y);
 				}
                         }
                 }
 	}
 
 	public void setUpGame() {
-		createClient();
+		client = new Client(this);
+		createWindow();
 
-		if (client.connected){
+                receiveMessages();
+	}
 
+	public void receiveMessages() {
+		while (true){
+			try {
+				String message = client.br.readLine();
 
+				if (message.equals("TURN")){ ///!!! need to use locks here so that when getting myTurn no data race	
+					lock.lock();
+					myTurn = true;
+					frame.setTitle("Your Turn!");
+					lock.unlock();					
+				}
 
-
-			createWindow();
+			} catch (IOException e){
+				System.out.println("ERROR READING MESSAGES");
+				e.printStackTrace();
+			}
 		}
-	}
-
-	public void createNetwork() {
-		createClient();
-
-		sendClientMessage("");
-
-		//create thing to receive messages
-
-
-
-
-	}
-
-	public void sendClientMessage(String message){
-		client.sendMessage(message);
-
-		try {
-            		lock.lock();
-            		while (!client.sentMessage) {
-                		sentMessage.await();
-            		}
-            		client.sentMessage = false;
-        	} catch (InterruptedException e) {
-            		System.out.println("INTERRUPTED EXCEPTION");
-			e.printStackTrace();
-        	} finally {
-            		lock.unlock();
-        	}
 	}
 
 	public void createWindow() {
@@ -106,22 +100,7 @@ public class Main implements ActionListener {
                 frame.setSize(WIDTH, HEIGHT);
 		frame.setLocationRelativeTo(null);
                 frame.setResizable(false);
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setVisible(true);
-	}
-
-	public void createClient() {
-                try {
-                        client = new Client(this);
-                        lock.lock();
-                        while (!client.initialized) {
-                                clientInitialized.await();
-                        }
-                } catch (InterruptedException e) {
-                        System.out.println("INTERRUPTED EXCEPTION");
-                        e.printStackTrace();
-                } finally {
-                        lock.unlock();
-                }
+                frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		frame.setVisible(true);
 	}
 }
