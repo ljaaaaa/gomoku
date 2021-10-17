@@ -19,7 +19,7 @@ public class Client {
     	public Client(Main main) {
 		this.main = main;
 		try {
-                	socket = new Socket("10.0.0.185", 2021);
+                	socket = new Socket("10.0.0.185", 1234);
                 	br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 	bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                 	connected = true;

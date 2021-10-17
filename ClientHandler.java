@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,8 +15,6 @@ public class ClientHandler implements Runnable{
 	private BufferedWriter bw;
 
 	public boolean gridSet = false;
-
-	public Lock lock = new ReentrantLock();
 
 	public Thread thread;
 	public Server server;
@@ -32,6 +29,15 @@ public class ClientHandler implements Runnable{
 		br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 		thread = new Thread(this);
+
+		System.out.println("hmmmm!");
+		server.gameOver = false;
+
+		System.out.println("here...");
+		server.gridLock.lock();
+		System.out.println("locked");
+		server.gridLock.unlock();
+		System.out.println("?");
 	}
 
 	@Override
