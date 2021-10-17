@@ -15,6 +15,7 @@ public class Server {
 	public boolean gameOver;
 
 	public Lock lock = new ReentrantLock();
+	public Lock gridLock = new ReentrantLock();
 	public Condition gameFinished = lock.newCondition();
 
 	public static void main(String[] args) throws IOException, InterruptedException{
@@ -26,11 +27,15 @@ public class Server {
 
 		int num = 0;
 		while (true) {
-			System.out.println("LISTENING");
+			System.out.println("SEARCHING FOR CLIENTS");
 			Socket socket = listener.accept();
 			System.out.println("FOUND CLIENT");
 
-			clients[num] = new ClientHandler('x', this, socket);
+			if (num == 0){
+				clients[num] = new ClientHandler("x", this, socket);
+			} else {
+				clients[num] = new ClientHandler("y", this, socket);
+			}
 
 			num++;
 
@@ -42,23 +47,7 @@ public class Server {
 				clients[0].thread.start();
 				clients[1].thread.start();
 			
-				clients[0].sendMessage("TURN"); //Tell PlayerX to go
-
-				while (!gameOver) {
-					try {
-						lock.lock();
-						gameFinished.await();
-					} finally {
-						lock.unlock();
-					}
-				}
-				clients[0].sendMessage("Game Over");
-	                        clients[1].sendMessage("Game Over");
-
-       				//SET UP FOR NEW GAME
-                        	clients = new ClientHandler[2];
-                        	grid = new String[19][19];
-                        	gameOver = false;
+				clients[0].sendMessage("TURN"); //Start Message
 			}
 		}
 	}

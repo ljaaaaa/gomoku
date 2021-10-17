@@ -5,14 +5,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.util.Scanner;
 import java.io.IOException;
 
-public class Main implements ActionListener {
-	//Constants
-	public final int WIDTH = 855;
-	public final int HEIGHT = 855;
-	
+public class Main implements ActionListener {	
 	//Visual
 	public JButton[][] grid = new JButton[19][19];
 	public JFrame frame;
@@ -21,37 +16,32 @@ public class Main implements ActionListener {
 	public Lock lock = new ReentrantLock();
 	public Client client;
 
-	//Game
-	public boolean myTurn = false;
-
 	public static void main(String[] args) {
-		Main main = new Main();
-		Scanner in = new Scanner(System.in);  
-		
-		System.out.println("Play a game? (Y/N)");
-		char play = in.next().charAt(0);   
-
-		if (play == 'Y' || play == 'y'){
-			 main.setUpGame();
-		}
+		new Main().setUpGame();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		for (int x = 0; x < grid.length; x++){
                         for (int y = 0; y < grid[x].length; y++){
-                                if (e.getSource() == grid[x][y]){
-				
-					lock.lock();	
-					if (myTurn){ //!!! lock here too
-						grid[x][y].setText("x");
-						grid[x][y].removeActionListener(this);
-	                                        frame.setTitle("Waiting...");
-					}
+                                if (e.getSource() == grid[x][y] && 
+					!grid[x][y].getText().equals("x") &&
+					!grid[x][y].getText().equals("o")){	
+
+					//...
+					lock.lock();
+					
+					grid[x][y].setText("x");
+	                                frame.setTitle("Waiting...");
+					removeButtonListeners();
+					
 					lock.unlock();	
+					
 					client.sendMessage("TURN DONE");
-					client.sendMessage(String.valueOf(x);
-					client.sendMessage(String.valueOf(y);
+					client.sendMessage(String.valueOf(x));
+					client.sendMessage(String.valueOf(y));
+					//...
+					System.out.println("turn done and messages sent");
 				}
                         }
                 }
@@ -60,7 +50,6 @@ public class Main implements ActionListener {
 	public void setUpGame() {
 		client = new Client(this);
 		createWindow();
-
                 receiveMessages();
 	}
 
@@ -68,11 +57,21 @@ public class Main implements ActionListener {
 		while (true){
 			try {
 				String message = client.br.readLine();
+				System.out.println("received message: " + message);
 
-				if (message.equals("TURN")){ ///!!! need to use locks here so that when getting myTurn no data race	
+				if (message.equals("UPDATE GRID")){
+                                        frame.setTitle("Updating Information...");
+                                        for (int x = 0; x < grid.length; x++){ //update grid
+                                                for (int y = 0; y < grid[x].length; y++){
+                                                        grid[x][y].setText(client.br.readLine());
+                                                }
+                                        }
+				}
+
+				if (message.equals("TURN")){	
 					lock.lock();
-					myTurn = true;
 					frame.setTitle("Your Turn!");
+					addButtonListeners();
 					lock.unlock();					
 				}
 
@@ -91,16 +90,31 @@ public class Main implements ActionListener {
 		for (int x = 0; x < grid.length; x++){
                        for (int y = 0; y < grid[x].length; y++){
 			       grid[x][y] = new JButton("");
-                               grid[x][y].addActionListener(this);
                                panel.add(grid[x][y]);
                        }
                 }
 
 		frame.add(panel);
-                frame.setSize(WIDTH, HEIGHT);
+                frame.setSize(855, 855);
 		frame.setLocationRelativeTo(null);
-                frame.setResizable(false);
                 frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		frame.setVisible(true);
+	}
+
+	public void removeButtonListeners(){ //When not users turn, remove listeners so buttons can't be clicked
+		for (int x = 0; x < grid.length; x++){
+			for (int y = 0; y < grid[x].length; y++){
+				grid[x][y].removeActionListener(this);
+			}
+		}
+	}
+
+	public void addButtonListeners(){ //add button listeners
+		for (int x = 0; x < grid.length; x++){
+                        for (int y = 0; y < grid[x].length; y++){
+                                grid[x][y].addActionListener(this);
+                        }
+                }
+
 	}
 }

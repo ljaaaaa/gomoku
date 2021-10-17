@@ -25,7 +25,6 @@ public class Client {
                 	connected = true;
 	       	} catch (IOException e) {
                   	System.out.println("COULD NOT CONNECT TO SERVER");
-			e.printStackTrace();
                 }
 	}
 
@@ -35,7 +34,7 @@ public class Client {
 			bw.newLine();
                 	bw.flush();
                 } catch (IOException e) {
-			System.out.println("ERROR SENDING MESSAGE"); //
+			System.out.println("ERROR SENDING MESSAGE");
                     	e.printStackTrace();
                 }
     	}

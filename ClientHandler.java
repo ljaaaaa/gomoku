@@ -15,17 +15,16 @@ public class ClientHandler implements Runnable{
 	private BufferedReader br;
 	private BufferedWriter bw;
 
-	public String[][] grid = new String[19][19];
 	public boolean gridSet = false;
 
 	public Lock lock = new ReentrantLock();
 
 	public Thread thread;
 	public Server server;
-	public char player;
+	public String player;
 	public ClientHandler[] clients;
 
-	public ClientHandler(char player, Server server, Socket socket) throws IOException{
+	public ClientHandler(String player, Server server, Socket socket) throws IOException{
 		this.socket = socket;
 		this.server = server;
 		this.player = player;
@@ -49,36 +48,46 @@ public class ClientHandler implements Runnable{
 					int posX = Integer.parseInt(br.readLine());
 					int posY = Integer.parseInt(br.readLine());
 
-					grid[posX][posY] = player;
+					try { //update server grid
+						server.gridLock.lock();
+						server.grid[posX][posY] = player;
+					} finally {
+						server.gridLock.unlock();
+					}
 
-					
-
-					//Then send message to other player for their turn
+					sendMessageToOther("TURN"); //Send message to other player for their turn
 				}
 			}
+			System.out.println("CLOSING SOCKET");
 			socket.close();
 			br.close();
 			bw.close();
 
-		} catch (Exception e) {
+		} catch (IOException e) {
 			System.out.println("PROBLEM OCCURED");
 			e.printStackTrace();
 		}
 	}
 
-	public void sendMessage(String message) throws IOException{
-		bw.write(message);
-		bw.newLine();
-		bw.flush();
-		System.out.println("MESSAGE SENT TO: " + message);
+	public void sendMessage(String message){
+		try {
+			bw.write(message);
+	                bw.newLine();
+        	        bw.flush();
+                	System.out.println("MESSAGE SENT TO: " + message);
+
+		} catch (IOException e){
+			System.out.println("IOEXCEPTION SENDING MESSAGE");
+			e.printStackTrace();
+		}
 	}
 
 	public void sendMessageToOther(String message){
-
 		for (int x = 0; x < clients.length; x++){
 			if (clients[x] != this){
 				clients[x].sendMessage("YOUR TURN");
 
 			}
+		}
 	}
 }
