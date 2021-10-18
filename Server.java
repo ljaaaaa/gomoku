@@ -8,8 +8,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
 	private ClientHandler[] clients = new ClientHandler[2];
-	
-	public boolean gameOver = false;
 
 	public String[][] grid = new String[19][19];
 	public Lock gridLock = new ReentrantLock();
@@ -19,7 +17,9 @@ public class Server {
 	}
 
 	public Server() throws IOException, InterruptedException{
-	       	ServerSocket listener = new ServerSocket(1234);
+		createBlankGrid(); //create empty grid (non nulls);
+
+		ServerSocket listener = new ServerSocket(1234);
                 System.out.println("SEARCHING FOR CLIENTS");
 
                 Socket socket = listener.accept();
@@ -28,7 +28,7 @@ public class Server {
 
                 Socket socket2 = listener.accept();
                 System.out.println("FOUND CLIENT 2");
-                clients[1] = new ClientHandler("y", this, socket2);
+                clients[1] = new ClientHandler("o", this, socket2);
 
                 //GAME STARTS
                 clients[0].clients = clients;
@@ -38,5 +38,14 @@ public class Server {
                 clients[1].thread.start();
 
                 clients[0].sendMessage("TURN");
+	}
+
+	public void createBlankGrid(){
+
+		for (int x = 0; x < grid.length; x++){
+			for (int y = 0; y < grid.length; y++){
+				grid[x][y] = "";
+			}
+		}
 	}
 }

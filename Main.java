@@ -26,20 +26,11 @@ public class Main implements ActionListener {
 					!grid[x][y].getText().equals("x") &&
 					!grid[x][y].getText().equals("o")){	
 
-					//...
-					lock.lock();
-					
-					grid[x][y].setText("x");
-	                                frame.setTitle("Waiting...");
 					removeButtonListeners();
-					
-					lock.unlock();	
 					
 					client.sendMessage("TURN DONE");
 					client.sendMessage(String.valueOf(x));
 					client.sendMessage(String.valueOf(y));
-					//...
-					System.out.println("turn done and messages sent");
 				}
                         }
                 }
@@ -55,7 +46,6 @@ public class Main implements ActionListener {
 		while (true){
 			try {
 				String message = client.br.readLine();
-				System.out.println("received message: " + message);
 
 				if (message.equals("UPDATE GRID")){
                                         frame.setTitle("Updating Information...");
@@ -64,6 +54,7 @@ public class Main implements ActionListener {
                                                         grid[x][y].setText(client.br.readLine());
                                                 }
                                         }
+					frame.setTitle("Waiting for other player");
 				}
 
 				if (message.equals("TURN")){	
@@ -84,7 +75,7 @@ public class Main implements ActionListener {
 		frame = new JFrame("Gomoku");
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridLayout(19, 19));
-
+		
 		for (int x = 0; x < grid.length; x++){
                        for (int y = 0; y < grid[x].length; y++){
 			       grid[x][y] = new JButton("");
@@ -96,6 +87,7 @@ public class Main implements ActionListener {
                 frame.setSize(855, 855);
 		frame.setLocationRelativeTo(null);
                 frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		frame.setResizable(true);
 		frame.setVisible(true);
 	}
 

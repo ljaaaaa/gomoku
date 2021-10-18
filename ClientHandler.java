@@ -27,15 +27,6 @@ public class ClientHandler implements Runnable{
 		br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 		thread = new Thread(this);
-
-		System.out.println("hmmmm!");
-		server.gameOver = false;
-
-		System.out.println("here...");
-		server.gridLock.lock();
-		System.out.println("locked");
-		server.gridLock.unlock();
-		System.out.println("?");
 	}
 
 	@Override
@@ -59,8 +50,17 @@ public class ClientHandler implements Runnable{
 						server.gridLock.unlock();
 					}
 
+					sendMessageToOther("UPDATE GRID");
+					sendMessage("UPDATE GRID");
+					for (int x = 0; x < server.grid.length; x++){ //send entire grid over to user
+						for (int y = 0; y < server.grid[x].length; y++){
+							sendMessage(server.grid[x][y]);
+							sendMessageToOther(server.grid[x][y]);
+						}
+					}
 					sendMessageToOther("TURN"); //Send message to other player for their turn
 				}
+
 			}
 			System.out.println("CLOSING SOCKET");
 			socket.close();
@@ -78,7 +78,6 @@ public class ClientHandler implements Runnable{
 			bw.write(message);
 	                bw.newLine();
         	        bw.flush();
-                	System.out.println("MESSAGE SENT TO: " + message);
 
 		} catch (IOException e){
 			System.out.println("IOEXCEPTION SENDING MESSAGE");
@@ -89,9 +88,62 @@ public class ClientHandler implements Runnable{
 	public void sendMessageToOther(String message){
 		for (int x = 0; x < clients.length; x++){
 			if (clients[x] != this){
-				clients[x].sendMessage("YOUR TURN");
+				clients[x].sendMessage(message);
 
 			}
 		}
+	}
+
+	public boolean checkWin(){ //check if five in a row in any direction (up, side, diagonal);
+
+		String[][] g = server.grid; //grid
+
+		for (int x = 0; x < g.length; x++){
+			for (int y = 0; y < g.length; y++){
+
+				try { //check column
+					if (g[x][y] == player && 
+						g[x][y+1] == player && 
+						g[x][y+2] == player && 
+						g[x][y+3] == player &&
+						g[x][y+4] == player){ 
+
+						return true;
+					}
+
+				} catch (NullPointerException e) {
+					System.out.println("here");
+				}
+
+				try { //check row
+					if (g[x][y] == player && 
+                                                g[x+1][y] == player &&
+                                                g[x+2][y] == player &&
+                                                g[x+3][y] == player &&
+                                                g[x+4][y] == player){
+
+                                                return true;
+                                        }
+
+				} catch (NullPointerException e) {
+					System.out.println("here.");
+				}
+
+				try { //check diagonal
+					if (g[x][y] == player &&
+                                                g[x+1][y+1] == player &&
+                                                g[x+2][y+2] == player &&
+                                                g[x+3][y+3] == player &&
+                                                g[x+4][y+4] == player){
+
+                                                return true;
+                                        }
+
+				} catch (NullPointerException e) {
+					System.out.println("here..");
+				}
+			}
+		}
+		return false;
 	}
 }
