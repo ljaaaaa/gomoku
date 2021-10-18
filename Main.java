@@ -1,5 +1,4 @@
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Scanner;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -11,11 +10,20 @@ public class Main implements ActionListener {
 	public JFrame frame;
 
 	//Networking
-	public Lock lock = new ReentrantLock();
 	public Client client;
 
 	public static void main(String[] args) {
-		new Main().setUpGame();
+		Scanner in = new Scanner(System.in);
+
+		System.out.println("Play Gomoku?");
+		char input = in.nextLine().charAt(0);
+
+		if (input == 'y' || input == 'Y'){
+			System.out.println("Have fun playing!");
+			new Main().setUpGame();	
+		} else {
+			System.out.println("Come back soon!");
+		}
 	}
 
 	@Override
@@ -58,10 +66,16 @@ public class Main implements ActionListener {
 				}
 
 				if (message.equals("TURN")){	
-					lock.lock();
 					frame.setTitle("Your Turn!");
-					addButtonListeners();
-					lock.unlock();					
+					addButtonListeners();					
+				}
+
+				if (message.equals("RESULTS")){
+					String result = client.br.readLine();
+					System.out.println("GAME OVER!!!");
+					System.out.println("Player " + result + " wins!");
+					frame.setTitle("Game Over! Player" + result + " wins!")'
+					break;
 				}
 
 			} catch (IOException e){

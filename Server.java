@@ -1,8 +1,6 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -41,7 +39,6 @@ public class Server {
 	}
 
 	public void createBlankGrid(){
-
 		for (int x = 0; x < grid.length; x++){
 			for (int y = 0; y < grid.length; y++){
 				grid[x][y] = "";
