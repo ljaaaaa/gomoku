@@ -74,7 +74,8 @@ public class Main implements ActionListener {
 					String result = client.br.readLine();
 					System.out.println("GAME OVER!!!");
 					System.out.println("Player " + result + " wins!");
-					frame.setTitle("Game Over! Player" + result + " wins!")'
+					frame.setTitle("Game Over! Player " + result + " wins!");
+					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					break;
 				}
 
