@@ -10,7 +10,6 @@ public class Client {
 	public BufferedReader br;
 	public BufferedWriter bw;
 	public Main main;
-
    	public boolean connected = false;
 
     	public Client(Main main) {
@@ -20,9 +19,7 @@ public class Client {
                 	br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 	bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                 	connected = true;
-	       	} catch (IOException e) {
-                  	System.out.println("COULD NOT CONNECT TO SERVER");
-                }
+	       	} catch (IOException e) { }
 	}
 
     	public void sendMessage(String message) {

@@ -1,29 +1,16 @@
-import java.util.Scanner;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.io.IOException;
 
 public class Main implements ActionListener {	
-	//Visual
 	public JButton[][] grid = new JButton[19][19];
 	public JFrame frame;
-
-	//Networking
 	public Client client;
+	public String player = "";
 
 	public static void main(String[] args) {
-		Scanner in = new Scanner(System.in);
-
-		System.out.println("Play Gomoku?");
-		char input = in.nextLine().charAt(0);
-
-		if (input == 'y' || input == 'Y'){
-			System.out.println("Have fun playing!");
-			new Main().setUpGame();	
-		} else {
-			System.out.println("Come back soon!");
-		}
+		new Main().setUpGame();	
 	}
 
 	@Override
@@ -31,9 +18,8 @@ public class Main implements ActionListener {
 		for (int x = 0; x < grid.length; x++){
                         for (int y = 0; y < grid[x].length; y++){
                                 if (e.getSource() == grid[x][y] && 
-					!grid[x][y].getText().equals("x") &&
-					!grid[x][y].getText().equals("o")){	
-
+						!grid[x][y].getText().equals("x") && 
+						!grid[x][y].getText().equals("o")){	
 					removeButtonListeners();
 					
 					client.sendMessage("TURN DONE");
@@ -47,34 +33,53 @@ public class Main implements ActionListener {
 	public void setUpGame() {
 		client = new Client(this);
 		createWindow();
-                receiveMessages();
+
+		if (!client.connected){
+			setFrameTitle("", "not connected");
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
+		} else {
+			receiveMessages();
+		}
 	}
 
 	public void receiveMessages() {
 		while (true){
 			try {
-				String message = client.br.readLine();
+				String message = "";
+				if (client.br != null){
+					message = client.br.readLine();
+				}
+
+				if (message == null){
+					System.out.println("MESSAGE WAS NULL");
+					break;
+				}
+
+				if (message.equals("PLAYER")){
+					player = client.br.readLine();
+
+					if (player.equals("o")){
+						setFrameTitle("", "wait");
+					}
+				}
 
 				if (message.equals("UPDATE GRID")){
-                                        frame.setTitle("Updating Information...");
-                                        for (int x = 0; x < grid.length; x++){ //update grid
+                                        for (int x = 0; x < grid.length; x++){
                                                 for (int y = 0; y < grid[x].length; y++){
-                                                        grid[x][y].setText(client.br.readLine());
+							setGridImage(x, y, client.br.readLine());
                                                 }
                                         }
-					frame.setTitle("Waiting for other player");
+					setFrameTitle("", "wait");
 				}
 
 				if (message.equals("TURN")){	
-					frame.setTitle("Your Turn!");
+					setFrameTitle(player, "turn");
 					addButtonListeners();					
 				}
 
 				if (message.equals("RESULTS")){
 					String result = client.br.readLine();
-					System.out.println("GAME OVER!!!");
-					System.out.println("Player " + result + " wins!");
-					frame.setTitle("Game Over! Player " + result + " wins!");
+					setFrameTitle(result, "win");
 					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					break;
 				}
@@ -93,17 +98,69 @@ public class Main implements ActionListener {
 		
 		for (int x = 0; x < grid.length; x++){
                        for (int y = 0; y < grid[x].length; y++){
-			       grid[x][y] = new JButton("");
+			       	grid[x][y] = new JButton("");
+			       	grid[x][y].setFocusPainted(false);
+			       	grid[x][y].setMargin(new Insets(0, 0, 0, 0));
+				grid[x][y].setContentAreaFilled(false);
+        			grid[x][y].setBorderPainted(false);
+        			grid[x][y].setOpaque(false);
+				setGridImage(x, y, "");
                                panel.add(grid[x][y]);
-                       }
+		
+		       }
                 }
 
 		frame.add(panel);
-                frame.setSize(855, 855);
+		frame.setIconImage(new ImageIcon("images/tile.png").getImage());
+                frame.setSize(655, 655);
 		frame.setLocationRelativeTo(null);
                 frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		frame.setResizable(true);
+		frame.setResizable(false);
 		frame.setVisible(true);
+	}
+
+	public void setFrameTitle(String player, String message){
+		if (player.equals("x")){
+			player = "black";
+		} else if (player.equals("o")){
+			player = "white";
+		} else {
+			player = "";
+		}
+
+		switch (message){
+			case "win":
+				frame.setTitle("Player " + player + " wins!");
+				break;
+
+			case "turn":
+				frame.setTitle("Your turn! You are player " + player);
+				break;
+
+			case "wait":
+				frame.setTitle("Please wait for your turn...");
+				break;
+
+			case "not connected":
+				frame.setTitle("Not connected to server");
+				break;
+		}
+	}
+
+	public void setGridImage(int x, int y, String text){
+		switch (text){
+			case "":
+				grid[x][y].setIcon(new ImageIcon("images/tile.png"));
+				break;
+
+			case "x":
+				grid[x][y].setIcon(new ImageIcon("images/black_tile.png"));
+				break;
+
+			case "o":
+				grid[x][y].setIcon(new ImageIcon("images/white_tile.png"));
+				break;
+		}
 	}
 
 	public void removeButtonListeners(){ //When not users turn, remove listeners so buttons can't be clicked
@@ -122,4 +179,6 @@ public class Main implements ActionListener {
                 }
 
 	}
+
+
 }

@@ -32,6 +32,11 @@ public class Server {
                 clients[0].clients = clients;
                 clients[1].clients = clients;
 
+		clients[0].sendMessage("PLAYER");
+		clients[0].sendMessage("x");
+		clients[1].sendMessage("PLAYER");
+		clients[1].sendMessage("o");
+
                 clients[0].thread.start();
                 clients[1].thread.start();
 
