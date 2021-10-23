@@ -31,7 +31,7 @@ public class ClientHandler implements Runnable{
 			while (true) {
 				String msgFromClient = br.readLine();
 
-				if (msgFromClient == null) { //Server has disconnected
+				if (msgFromClient == null) { //Disconnected from server
 					break;
 				}
 
@@ -68,10 +68,10 @@ public class ClientHandler implements Runnable{
 
 			}
 			System.out.println("CLOSING SOCKET");
+			sendMessageToOther("OTHER PLAYER DISCONNECTED");
 			socket.close();
 			br.close();
 			bw.close();
-
 		} catch (IOException e) {
 			System.out.println("PROBLEM OCCURED");
 			e.printStackTrace();
@@ -83,7 +83,6 @@ public class ClientHandler implements Runnable{
 			bw.write(message);
 	                bw.newLine();
         	        bw.flush();
-
 		} catch (IOException e){
 			System.out.println("IOEXCEPTION SENDING MESSAGE");
 			e.printStackTrace();

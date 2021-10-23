@@ -16,16 +16,12 @@ public class Server {
 
 	public Server() throws IOException, InterruptedException{
 		createBlankGrid(); //create empty grid (non nulls);
-
 		ServerSocket listener = new ServerSocket(1234);
-                System.out.println("SEARCHING FOR CLIENTS");
 
                 Socket socket = listener.accept();
-                System.out.println("FOUND CLIENT");
                	clients[0] = new ClientHandler("x", this, socket);
 
                 Socket socket2 = listener.accept();
-                System.out.println("FOUND CLIENT 2");
                 clients[1] = new ClientHandler("o", this, socket2);
 
                 //GAME STARTS

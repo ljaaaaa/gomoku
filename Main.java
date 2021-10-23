@@ -8,6 +8,7 @@ public class Main implements ActionListener {
 	public JFrame frame;
 	public Client client;
 	public String player = "";
+	public String playerColor = "";
 
 	public static void main(String[] args) {
 		new Main().setUpGame();	
@@ -33,11 +34,11 @@ public class Main implements ActionListener {
 	public void setUpGame() {
 		client = new Client(this);
 		createWindow();
-
 		if (!client.connected){
-			setFrameTitle("", "not connected");
+			frame.setTitle("You are not connected to the server");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 		} else {
+			frame.setTitle("Waiting for second player to join");
 			receiveMessages();
 		}
 	}
@@ -51,15 +52,22 @@ public class Main implements ActionListener {
 				}
 
 				if (message == null){
-					System.out.println("MESSAGE WAS NULL");
+					frame.setTitle("You have disconnected from the server");
+					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					break;
 				}
 
 				if (message.equals("PLAYER")){
 					player = client.br.readLine();
 
+					if (player.equals("x")){ //set player color
+						playerColor = "black";
+					} else {
+						playerColor = "white";
+					}
+
 					if (player.equals("o")){
-						setFrameTitle("", "wait");
+						frame.setTitle("Please wait for your turn...");
 					}
 				}
 
@@ -69,7 +77,7 @@ public class Main implements ActionListener {
 							setGridImage(x, y, client.br.readLine());
                                                 }
                                         }
-					setFrameTitle("", "wait");
+					frame.setTitle("Please wait for your turn...");
 				}
 
 				if (message.equals("TURN")){	
@@ -79,13 +87,22 @@ public class Main implements ActionListener {
 
 				if (message.equals("RESULTS")){
 					String result = client.br.readLine();
-					setFrameTitle(result, "win");
+
+					if (result == player){
+						frame.setTitle("You win! - you got five in a row");
+					} else {
+						frame.setTitle("You lost! - other player got five in a row");
+					}
+
 					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					break;
 				}
 
+				if (message.equals("OTHER PLAYER DISCONNECTED")){
+					frame.setTitle("You win! - other player disconnected");
+				}
+
 			} catch (IOException e){
-				System.out.println("ERROR READING MESSAGES");
 				e.printStackTrace();
 			}
 		}
@@ -124,8 +141,6 @@ public class Main implements ActionListener {
 			player = "black";
 		} else if (player.equals("o")){
 			player = "white";
-		} else {
-			player = "";
 		}
 
 		switch (message){
@@ -133,16 +148,12 @@ public class Main implements ActionListener {
 				frame.setTitle("Player " + player + " wins!");
 				break;
 
+			case "win2":
+				frame.setTitle("Player " + player + " wins! - other player disconnected");
+				break;
+
 			case "turn":
 				frame.setTitle("Your turn! You are player " + player);
-				break;
-
-			case "wait":
-				frame.setTitle("Please wait for your turn...");
-				break;
-
-			case "not connected":
-				frame.setTitle("Not connected to server");
 				break;
 		}
 	}
