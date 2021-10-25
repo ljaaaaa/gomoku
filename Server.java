@@ -6,48 +6,42 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
-	private ClientHandler[] clients = new ClientHandler[2];
-	public String[][] grid = new String[19][19];
-
-	private ArrayList<ClientHandler> allClients = new ArrayList<>();
-	private ArrayList<String[][]> allGrids = new ArrayList<>();
-	private ArrayList<Lock> allLocks = new ArrayList<>();
-
-	public Lock gridLock = new ReentrantLock();
+	private ArrayList<Game> games = new ArrayList<>();
 
 	public static void main(String[] args) throws IOException, InterruptedException{
 		Server server = new Server();
 	}
 
-	public Server() throws IOException, InterruptedException{	
-		createBlankGrid(); //create empty grid 
+	public Server() throws IOException, InterruptedException{
 		ServerSocket listener = new ServerSocket(1234);
 
-                Socket socket = listener.accept();
-               	clients[0] = new ClientHandler("x", this, socket);
+		while (true) {
+			Game game = new Game(new ClientHandler[2]);
 
-                Socket socket2 = listener.accept();
-                clients[1] = new ClientHandler("o", this, socket2);
+                	Socket socket = listener.accept();
+                	game.clients[0] = new ClientHandler("x", game, socket);
 
-                //GAME STARTS
-                clients[0].clients = clients;
-                clients[1].clients = clients;
+                	socket = listener.accept();
+			try {
 
-		clients[0].sendMessage("PLAYER");
-		clients[0].sendMessage("x");
-		clients[1].sendMessage("PLAYER");
-		clients[1].sendMessage("o");
+				try {
+		                        game.clients[0].bw.write("");
+                		        game.clients[0].bw.newLine();
+                        		game.clients[0].bw.flush();
+                		} catch (IOException e) {
+                        		System.out.println("ERROR SENDING MESSAGE");
+                        		e.printStackTrace();
+                		}
+				game.lock.lock();
+				if (!game.gameOver){
+					System.out.println("game is not over");
+					game.clients[1] = new ClientHandler("o", game, socket);
+		                        game.startGame();
+                		        games.add(game);
+				}
 
-                clients[0].thread.start();
-                clients[1].thread.start();
-
-                clients[0].sendMessage("TURN");
-	}
-
-	public void createBlankGrid(){
-		for (int x = 0; x < grid.length; x++){
-			for (int y = 0; y < grid.length; y++){
-				grid[x][y] = "";
+			} finally {
+				game.lock.unlock();
 			}
 		}
 	}

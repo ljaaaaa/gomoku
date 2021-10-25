@@ -46,10 +46,7 @@ public class Main implements ActionListener {
 	public void receiveMessages() {
 		while (true){
 			try {
-				String message = "";
-				if (client.br != null){
-					message = client.br.readLine();
-				}
+				String message = client.br.readLine();
 
 				if (message == null){
 					frame.setTitle("You have disconnected from the server");
@@ -81,14 +78,14 @@ public class Main implements ActionListener {
 				}
 
 				if (message.equals("TURN")){	
-					setFrameTitle(player, "turn");
+					frame.setTitle("Your turn! - you are player " + playerColor);
 					addButtonListeners();					
 				}
 
 				if (message.equals("RESULTS")){
 					String result = client.br.readLine();
 
-					if (result == player){
+					if (result.equals(player)){
 						frame.setTitle("You win! - you got five in a row");
 					} else {
 						frame.setTitle("You lost! - other player got five in a row");
@@ -134,28 +131,6 @@ public class Main implements ActionListener {
                 frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setVisible(true);
-	}
-
-	public void setFrameTitle(String player, String message){
-		if (player.equals("x")){
-			player = "black";
-		} else if (player.equals("o")){
-			player = "white";
-		}
-
-		switch (message){
-			case "win":
-				frame.setTitle("Player " + player + " wins!");
-				break;
-
-			case "win2":
-				frame.setTitle("Player " + player + " wins! - other player disconnected");
-				break;
-
-			case "turn":
-				frame.setTitle("Your turn! You are player " + player);
-				break;
-		}
 	}
 
 	public void setGridImage(int x, int y, String text){

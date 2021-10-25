@@ -14,7 +14,7 @@ public class Client {
 
     	public Client(Main main) {
 		this.main = main;
-		try { //10.0.0.185 --- 10.20.48.170
+		try { 
                 	socket = new Socket("localhost", 1234);
                 	br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 	bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));

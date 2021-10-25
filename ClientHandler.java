@@ -7,17 +7,17 @@ import java.net.Socket;
 
 public class ClientHandler implements Runnable{
 	private Socket socket;
-	private BufferedReader br;
-	private BufferedWriter bw;
+	public BufferedReader br;
+	public BufferedWriter bw;
 
 	public Thread thread;
-	public Server server;
+	public Game game;
 	public String player;
 	public ClientHandler[] clients;
 
-	public ClientHandler(String player, Server server, Socket socket) throws IOException{
+	public ClientHandler(String player, Game game, Socket socket) throws IOException{
 		this.socket = socket;
-		this.server = server;
+		this.game = game;
 		this.player = player;
 
 		br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -31,7 +31,7 @@ public class ClientHandler implements Runnable{
 			while (true) {
 				String msgFromClient = br.readLine();
 
-				if (msgFromClient == null) { //Disconnected from server
+				if (msgFromClient == null) { //Disconnected from game
 					break;
 				}
 
@@ -39,21 +39,22 @@ public class ClientHandler implements Runnable{
 					int posX = Integer.parseInt(br.readLine());
 					int posY = Integer.parseInt(br.readLine());
 
-					try { //update server grid
-						server.gridLock.lock();
-						server.grid[posX][posY] = player;
+					try { //update game grid
+						game.lock.lock();
+						game.grid[posX][posY] = player;
 					} finally {
-						server.gridLock.unlock();
+						game.lock.unlock();
 					}
 
 					sendMessageToOther("UPDATE GRID");
 					sendMessage("UPDATE GRID");
-					for (int x = 0; x < server.grid.length; x++){ //send entire grid over to user
-						for (int y = 0; y < server.grid[x].length; y++){
-							sendMessage(server.grid[x][y]);
-							sendMessageToOther(server.grid[x][y]);
+					for (int x = 0; x < game.grid.length; x++){ //send entire grid over to user
+						for (int y = 0; y < game.grid[x].length; y++){
+							sendMessage(game.grid[x][y]);
+							sendMessageToOther(game.grid[x][y]);
 						}
 					}
+
 					if (checkWin()){ //Game over
 						sendMessage("RESULTS");
 						sendMessage(player);
@@ -61,18 +62,33 @@ public class ClientHandler implements Runnable{
 						sendMessageToOther("RESULTS");
 						sendMessageToOther(player);
 
+						try {
+							game.lock.lock();
+							game.gameOver = true;
+						} finally {
+							game.lock.unlock();
+						}
+
 					} else { //Game continues
 						sendMessageToOther("TURN");
 					}
 				}
 
 			}
-			System.out.println("CLOSING SOCKET");
 			sendMessageToOther("OTHER PLAYER DISCONNECTED");
 			socket.close();
 			br.close();
 			bw.close();
-		} catch (IOException e) {
+
+			try {
+				game.lock.lock();
+				game.gameOver = true;
+				System.out.println("setting game over to true");
+			} finally {
+				game.lock.unlock();
+			}
+
+		} catch (IOException e) { 
 			System.out.println("PROBLEM OCCURED");
 			e.printStackTrace();
 		}
@@ -83,10 +99,7 @@ public class ClientHandler implements Runnable{
 			bw.write(message);
 	                bw.newLine();
         	        bw.flush();
-		} catch (IOException e){
-			System.out.println("IOEXCEPTION SENDING MESSAGE");
-			e.printStackTrace();
-		}
+		} catch (IOException e){ } //stream has closed and messages can't be sent
 	}
 
 	public void sendMessageToOther(String message){
@@ -99,7 +112,7 @@ public class ClientHandler implements Runnable{
 	}
 
 	public boolean checkWin(){ //check if player has won
-		String[][] g = server.grid;
+		String[][] g = game.grid;
 
 		for (int x = 0; x < g.length; x++){
 			for (int y = 0; y < g.length; y++){
