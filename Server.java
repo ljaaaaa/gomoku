@@ -1,21 +1,26 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
 	private ClientHandler[] clients = new ClientHandler[2];
-
 	public String[][] grid = new String[19][19];
+
+	private ArrayList<ClientHandler> allClients = new ArrayList<>();
+	private ArrayList<String[][]> allGrids = new ArrayList<>();
+	private ArrayList<Lock> allLocks = new ArrayList<>();
+
 	public Lock gridLock = new ReentrantLock();
 
 	public static void main(String[] args) throws IOException, InterruptedException{
 		Server server = new Server();
 	}
 
-	public Server() throws IOException, InterruptedException{
-		createBlankGrid(); //create empty grid (non nulls);
+	public Server() throws IOException, InterruptedException{	
+		createBlankGrid(); //create empty grid 
 		ServerSocket listener = new ServerSocket(1234);
 
                 Socket socket = listener.accept();
