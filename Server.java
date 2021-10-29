@@ -17,42 +17,13 @@ public class Server {
 
 		while (true) {
 			Game game = new Game(new ClientHandler[2]);
-
                 	Socket socket = listener.accept();
                 	game.clients[0] = new ClientHandler("x", game, socket);
-			game.clients[0].thread.start();
-
-                	socket = listener.accept();
-			try {
-
-				try {
-		                        game.clients[0].bw.write("CONNECTION CHECK");
-					game.clients[0].bw.newLine();
-                        		game.clients[0].bw.flush();
-					System.out.println("wrote message?");
-                		} catch (IOException e) {
-                        		System.out.println("ERROR SENDING MESSAGE");
-                        		e.printStackTrace();
-                		}
-				game.lock.lock();
-				while (!game.connectionChecked){
-					System.out.println("awaiting...");
-					game.waitingConnectionCheck.await();
-				}
-				System.out.println("waited!");
-				game.connectionChecked = false;
-
-				if (game.clients[0].connected){
-					System.out.println("game is not over");
-					game.clients[1] = new ClientHandler("o", game, socket);
-		                        game.startGame();
-                		        games.add(game);
-				} else {
-					System.out.println("game abandoned");
-				}
-			} finally {
-				game.lock.unlock();
-			}
+  
+			socket = listener.accept();
+			game.clients[1] = new ClientHandler("o", game, socket);
+		      	game.startGame();
+               		games.add(game);
 		}
 	}
 }
