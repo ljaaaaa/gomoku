@@ -97,6 +97,7 @@ public class Main implements ActionListener {
 
 				if (message.equals("OTHER PLAYER DISCONNECTED")){
 					frame.setTitle("You win! - other player disconnected");
+					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				}
 
 			} catch (IOException e){

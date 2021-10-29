@@ -15,6 +15,8 @@ public class ClientHandler implements Runnable{
 	public String player;
 	public ClientHandler[] clients;
 
+	public boolean connected = true;
+
 	public ClientHandler(String player, Game game, Socket socket) throws IOException{
 		this.socket = socket;
 		this.game = game;
@@ -28,11 +30,24 @@ public class ClientHandler implements Runnable{
 	@Override
 	public void run() {
 		try {
+			System.out.println("started this thread!");
 			while (true) {
 				String msgFromClient = br.readLine();
-
+				System.out.println("received message: " + msgFromClient);
+				System.out.println(msgFromClient);
 				if (msgFromClient == null) { //Disconnected from game
 					break;
+				}
+
+				if (msgFromClient.equals("CONNECTION CHECK")){ //Checking connection
+					System.out.println("received connection check!");
+					game.lock.lock();
+		                        game.gameOver = true;
+                		        game.connectionChecked = true;
+                     			connected = true;
+                        		game.waitingConnectionCheck.signalAll();
+                        		System.out.println("signaled");
+                        		game.lock.unlock();
 				}
 
 				if (msgFromClient.equals("TURN DONE")){
@@ -79,18 +94,16 @@ public class ClientHandler implements Runnable{
 			socket.close();
 			br.close();
 			bw.close();
-
-			try {
-				game.lock.lock();
-				game.gameOver = true;
-				System.out.println("setting game over to true");
-			} finally {
-				game.lock.unlock();
-			}
-
-		} catch (IOException e) { 
+		} catch (Exception e) { //IOException or NullPointerException
 			System.out.println("PROBLEM OCCURED");
-			e.printStackTrace();
+		} finally {
+			game.lock.lock();
+                        game.gameOver = true;
+			game.connectionChecked = true;
+			connected = false;
+			game.waitingConnectionCheck.signalAll();
+                        System.out.println("signaled");
+			game.lock.unlock();
 		}
 	}
 

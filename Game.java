@@ -1,12 +1,16 @@
 import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Game {
 	public ClientHandler[] clients;
-
 	public String[][] grid = new String[19][19];
+	
 	public Lock lock = new ReentrantLock();
+	public Condition waitingConnectionCheck = lock.newCondition();
+	public boolean connectionChecked = false;
+
 	public boolean gameOver = false;
 
 	public Game(ClientHandler[] clients){
