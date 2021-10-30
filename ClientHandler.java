@@ -71,10 +71,7 @@ public class ClientHandler implements Runnable{
 			socket.close();
 			br.close();
 			bw.close();
-		} catch (IOException e) {
-			System.out.println("PROBLEM OCCURED");
-			e.printStackTrace();
-		}
+		} catch (IOException e) { } //Connection reset
 	}
 
 	public void sendMessage(String message){

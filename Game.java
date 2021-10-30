@@ -21,9 +21,9 @@ public class Game {
                 clients[1].clients = clients;
 
                 clients[0].sendMessage("PLAYER");
-                clients[0].sendMessage("x");
+                clients[0].sendMessage("black");
                 clients[1].sendMessage("PLAYER");
-                clients[1].sendMessage("o");
+                clients[1].sendMessage("white");
 
                 clients[0].thread.start();
                 clients[1].thread.start();

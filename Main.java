@@ -8,7 +8,6 @@ public class Main implements ActionListener {
 	public JFrame frame;
 	public Client client;
 	public String player = "";
-	public String playerColor = "";
 
 	public boolean oneMoveDone = false;
 
@@ -20,11 +19,11 @@ public class Main implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		for (int x = 0; x < grid.length; x++){
                         for (int y = 0; y < grid[x].length; y++){
-                                if (e.getSource() == grid[x][y] && 
-						!grid[x][y].getText().equals("x") && 
-						!grid[x][y].getText().equals("o")){	
+				Icon icon = (new JButton(new ImageIcon("images/_tile.png"))).getIcon();
+				String one = "" + icon;
+				String two = "" + grid[x][y].getIcon();
+                                if (e.getSource() == grid[x][y] && one.equals(two)) {
 					removeButtonListeners();
-					
 					client.sendMessage("TURN DONE");
 					client.sendMessage(String.valueOf(x));
 					client.sendMessage(String.valueOf(y));
@@ -49,7 +48,6 @@ public class Main implements ActionListener {
 		while (true){
 			try {
 				String message = client.br.readLine();
-				System.out.println("received: " + message);
 				if (message == null){
 					frame.setTitle("You have disconnected from the server");
 					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -59,13 +57,7 @@ public class Main implements ActionListener {
 				if (message.equals("PLAYER")){
 					player = client.br.readLine();
 
-					if (player.equals("x")){ //set player color
-						playerColor = "black";
-					} else {
-						playerColor = "white";
-					}
-
-					if (player.equals("o")){
+					if (player.equals("white")){
 						frame.setTitle("Please wait for your turn...");
 					}
 					oneMoveDone = true;
@@ -74,7 +66,7 @@ public class Main implements ActionListener {
 				if (message.equals("UPDATE GRID")){
                                         for (int x = 0; x < grid.length; x++){
                                                 for (int y = 0; y < grid[x].length; y++){
-							setGridImage(x, y, client.br.readLine());
+							grid[x][y].setIcon(new ImageIcon("images/" + client.br.readLine() + "_tile.png"));
                                                 }
                                         }
 					frame.setTitle("Please wait for your turn...");
@@ -82,7 +74,7 @@ public class Main implements ActionListener {
 				}
 
 				if (message.equals("TURN")){	
-					frame.setTitle("Your turn! - you are player " + playerColor);
+					frame.setTitle("Your turn! - you are player " + player);
 					addButtonListeners();
 					oneMoveDone = false;					
 				}
@@ -130,35 +122,18 @@ public class Main implements ActionListener {
 				grid[x][y].setContentAreaFilled(false);
         			grid[x][y].setBorderPainted(false);
         			grid[x][y].setOpaque(false);
-				setGridImage(x, y, "");
-                               panel.add(grid[x][y]);
-		
+				grid[x][y].setIcon(new ImageIcon("images/_tile.png"));
+                               	panel.add(grid[x][y]);
 		       }
                 }
 
 		frame.add(panel);
-		frame.setIconImage(new ImageIcon("images/tile.png").getImage());
+		frame.setIconImage(new ImageIcon("images/_tile.png").getImage());
                 frame.setSize(655, 655);
 		frame.setLocationRelativeTo(null);
                 frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setVisible(true);
-	}
-
-	public void setGridImage(int x, int y, String text){
-		switch (text){
-			case "":
-				grid[x][y].setIcon(new ImageIcon("images/tile.png"));
-				break;
-
-			case "x":
-				grid[x][y].setIcon(new ImageIcon("images/black_tile.png"));
-				break;
-
-			case "o":
-				grid[x][y].setIcon(new ImageIcon("images/white_tile.png"));
-				break;
-		}
 	}
 
 	public void removeButtonListeners(){ //When not users turn, remove listeners so buttons can't be clicked

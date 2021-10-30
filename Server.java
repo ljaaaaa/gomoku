@@ -18,10 +18,10 @@ public class Server {
 		while (true) {
 			Game game = new Game(new ClientHandler[2]);
                 	Socket socket = listener.accept();
-                	game.clients[0] = new ClientHandler("x", game, socket);
+                	game.clients[0] = new ClientHandler("black", game, socket);
   
 			socket = listener.accept();
-			game.clients[1] = new ClientHandler("o", game, socket);
+			game.clients[1] = new ClientHandler("white", game, socket);
 		      	game.startGame();
                		games.add(game);
 		}
