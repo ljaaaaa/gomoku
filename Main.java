@@ -10,6 +10,8 @@ public class Main implements ActionListener {
 	public String player = "";
 	public String playerColor = "";
 
+	public boolean oneMoveDone = false;
+
 	public static void main(String[] args) {
 		new Main().setUpGame();	
 	}
@@ -47,7 +49,7 @@ public class Main implements ActionListener {
 		while (true){
 			try {
 				String message = client.br.readLine();
-
+				System.out.println("received: " + message);
 				if (message == null){
 					frame.setTitle("You have disconnected from the server");
 					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -66,6 +68,7 @@ public class Main implements ActionListener {
 					if (player.equals("o")){
 						frame.setTitle("Please wait for your turn...");
 					}
+					oneMoveDone = true;
 				}
 
 				if (message.equals("UPDATE GRID")){
@@ -75,11 +78,13 @@ public class Main implements ActionListener {
                                                 }
                                         }
 					frame.setTitle("Please wait for your turn...");
+					oneMoveDone = false;
 				}
 
 				if (message.equals("TURN")){	
 					frame.setTitle("Your turn! - you are player " + playerColor);
-					addButtonListeners();					
+					addButtonListeners();
+					oneMoveDone = false;					
 				}
 
 				if (message.equals("RESULTS")){
@@ -92,12 +97,18 @@ public class Main implements ActionListener {
 					}
 
 					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					oneMoveDone = false;
 					break;
 				}
 
 				if (message.equals("OTHER PLAYER DISCONNECTED")){
-					frame.setTitle("You win! - other player disconnected");
-					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					if (oneMoveDone){ //game abandoned before started
+						frame.setTitle("This game was abandoned - please play another game");
+                                                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					} else { //game abandoned during game
+						frame.setTitle("You win! - other player disconnected");
+	                                        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);			
+					}	
 				}
 
 			} catch (IOException e){

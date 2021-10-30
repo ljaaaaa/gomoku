@@ -7,7 +7,6 @@ public class Game {
 	public String[][] grid = new String[19][19];
 	
 	public Lock lock = new ReentrantLock();
-	public boolean gameOver = false;
 
 	public Game(ClientHandler[] clients){
 		this.clients = clients;

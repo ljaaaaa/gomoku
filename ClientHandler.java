@@ -61,13 +61,6 @@ public class ClientHandler implements Runnable{
 						sendMessageToOther("RESULTS");
 						sendMessageToOther(player);
 
-						try {
-							game.lock.lock();
-							game.gameOver = true;
-						} finally {
-							game.lock.unlock();
-						}
-
 					} else { //Game continues
 						sendMessageToOther("TURN");
 					}
