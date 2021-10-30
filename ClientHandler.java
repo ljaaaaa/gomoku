@@ -54,6 +54,15 @@ public class ClientHandler implements Runnable{
 						}
 					}
 
+					//after sned changed square
+					sendMessage(String.valueOf(posX));
+					sendMessage(String.valueOf(posY));
+					sendMessage(player);
+
+					sendMessageToOther(String.valueOf(posX));
+					sendMessageToOther(String.valueOf(posY));
+					sendMessageToOther(player);
+
 					if (checkWin()){ //Game over
 						sendMessage("RESULTS");
 						sendMessage(player);
@@ -61,7 +70,15 @@ public class ClientHandler implements Runnable{
 						sendMessageToOther("RESULTS");
 						sendMessageToOther(player);
 
-					} else { //Game continues
+					} else if (checkDraw()) { //Game over
+						sendMessage("RESULTS");
+                                                sendMessage("draw");
+
+                                                sendMessageToOther("RESULTS");
+                                                sendMessageToOther("draw");
+					}
+						       
+					else { //Game continues
 						sendMessageToOther("TURN");
 					}
 				}
@@ -89,6 +106,19 @@ public class ClientHandler implements Runnable{
 
 			}
 		}
+	}
+
+	public boolean checkDraw(){
+		String[][] g = game.grid;
+
+		for (int x = 0; x < g.length; x++){
+			for (int y = 0; y < g[x].length; y++){
+				if (g[x][y].equals("")){
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	public boolean checkWin(){ //check if player has won

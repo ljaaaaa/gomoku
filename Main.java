@@ -60,6 +60,7 @@ public class Main implements ActionListener {
 					if (player.equals("white")){
 						frame.setTitle("Please wait for your turn...");
 					}
+					frame.setIconImage(new ImageIcon("images/" + player +  "_tile.png").getImage());
 					oneMoveDone = true;
 				}
 
@@ -69,6 +70,12 @@ public class Main implements ActionListener {
 							grid[x][y].setIcon(new ImageIcon("images/" + client.br.readLine() + "_tile.png"));
                                                 }
                                         }
+
+					//Changed square
+					int posX = Integer.parseInt(client.br.readLine());
+					int posY = Integer.parseInt(client.br.readLine());
+					grid[posX][posY].setIcon(new ImageIcon("images/" + client.br.readLine() + "_tile2.png"));
+
 					frame.setTitle("Please wait for your turn...");
 					oneMoveDone = false;
 				}
@@ -84,6 +91,8 @@ public class Main implements ActionListener {
 
 					if (result.equals(player)){
 						frame.setTitle("You win! - you got five in a row");
+					} else if (result.equals("draw")){
+						frame.setTitle("Draw - game board has been filled");
 					} else {
 						frame.setTitle("You lost! - other player got five in a row");
 					}
