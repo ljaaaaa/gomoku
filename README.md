@@ -2,7 +2,7 @@
 ![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/_tile.png) ![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/_tile.png)
 ![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/_tile.png) ![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/_tile.png) ![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/_tile.png)
 
-Simple Gomoku game
+Play a simple game of five in a row!
 
 # Set Up
 1. Download and unzip files
