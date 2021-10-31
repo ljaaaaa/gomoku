@@ -1,26 +1,33 @@
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 import java.io.IOException;
+
+/* MAIN CLASS
+ * - Runs game for one player
+ * - Uses Client Class to connect to Server Class
+ */
 
 public class Main implements ActionListener {	
 	public JButton[][] grid = new JButton[19][19];
 	public JFrame frame;
 	public Client client;
 	public String player = "";
-
 	public boolean oneMoveDone = false;
 
+	//Runs game
 	public static void main(String[] args) {
 		new Main().setUpGame();	
 	}
 
 	@Override
+	//Listenes for grid buttons to be pressed
 	public void actionPerformed(ActionEvent e) {
 		for (int x = 0; x < grid.length; x++){
                         for (int y = 0; y < grid[x].length; y++){
-				Icon icon = (new JButton(new ImageIcon("images/_tile.png"))).getIcon();
-				String one = "" + icon;
+				String one  = "" + (new JButton(new ImageIcon("images/_tile.png"))).getIcon();
 				String two = "" + grid[x][y].getIcon();
                                 if (e.getSource() == grid[x][y] && one.equals(two)) {
 					removeButtonListeners();
@@ -32,28 +39,33 @@ public class Main implements ActionListener {
                 }
 	}
 
+	//Sets up game
 	public void setUpGame() {
+		//Creates new client
 		client = new Client(this);
 		createWindow();
+
 		if (!client.connected){
-			frame.setTitle("You are not connected to the server");
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
+			frame.setTitle("You are not connected to the server");		
 		} else {
 			frame.setTitle("Waiting for second player to join");
 			receiveMessages();
 		}
 	}
 
+	//Receives messages sent from ClientHandler Class
 	public void receiveMessages() {
 		while (true){
 			try {
 				String message = client.br.readLine();
+
+				//Disconnected from server
 				if (message == null){
 					frame.setTitle("You have disconnected from the server");
-					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					break;
 				}
 
+				//Update player information
 				if (message.equals("PLAYER")){
 					player = client.br.readLine();
 
@@ -64,6 +76,7 @@ public class Main implements ActionListener {
 					oneMoveDone = true;
 				}
 
+				//Update grid
 				if (message.equals("UPDATE GRID")){
                                         for (int x = 0; x < grid.length; x++){
                                                 for (int y = 0; y < grid[x].length; y++){
@@ -71,7 +84,7 @@ public class Main implements ActionListener {
                                                 }
                                         }
 
-					//Changed square
+					//Recently changed square
 					int posX = Integer.parseInt(client.br.readLine());
 					int posY = Integer.parseInt(client.br.readLine());
 					grid[posX][posY].setIcon(new ImageIcon("images/" + client.br.readLine() + "_tile2.png"));
@@ -80,12 +93,14 @@ public class Main implements ActionListener {
 					oneMoveDone = false;
 				}
 
+				//Player's turn
 				if (message.equals("TURN")){	
 					frame.setTitle("Your turn! - you are player " + player);
 					addButtonListeners();
 					oneMoveDone = false;					
 				}
 
+				//Game over - results
 				if (message.equals("RESULTS")){
 					String result = client.br.readLine();
 
@@ -96,19 +111,20 @@ public class Main implements ActionListener {
 					} else {
 						frame.setTitle("You lost! - other player got five in a row");
 					}
-
-					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					oneMoveDone = false;
 					break;
 				}
 
+				//Game over - other disconnected
 				if (message.equals("OTHER PLAYER DISCONNECTED")){
-					if (oneMoveDone){ //game abandoned before started
+
+					//Game was abandoned before moves were played
+					if (oneMoveDone){
 						frame.setTitle("This game was abandoned - please play another game");
-                                                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-					} else { //game abandoned during game
-						frame.setTitle("You win! - other player disconnected");
-	                                        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);			
+
+					} //Game was abandoned during game 
+					else {
+						frame.setTitle("You win! - other player disconnected");	
 					}	
 				}
 
@@ -118,6 +134,7 @@ public class Main implements ActionListener {
 		}
 	}
 
+	//Creates visual JFrame Window
 	public void createWindow() {
 		frame = new JFrame("Gomoku");
 		JPanel panel = new JPanel();
@@ -125,13 +142,12 @@ public class Main implements ActionListener {
 		
 		for (int x = 0; x < grid.length; x++){
                        for (int y = 0; y < grid[x].length; y++){
-			       	grid[x][y] = new JButton("");
+			       	grid[x][y] = new JButton(new ImageIcon("images/_tile.png"));
 			       	grid[x][y].setFocusPainted(false);
 			       	grid[x][y].setMargin(new Insets(0, 0, 0, 0));
 				grid[x][y].setContentAreaFilled(false);
         			grid[x][y].setBorderPainted(false);
         			grid[x][y].setOpaque(false);
-				grid[x][y].setIcon(new ImageIcon("images/_tile.png"));
                                	panel.add(grid[x][y]);
 		       }
                 }
@@ -140,11 +156,12 @@ public class Main implements ActionListener {
 		frame.setIconImage(new ImageIcon("images/_tile.png").getImage());
                 frame.setSize(655, 655);
 		frame.setLocationRelativeTo(null);
-                frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+               	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setVisible(true);
 	}
 
+	//Removes button listeners from grid
 	public void removeButtonListeners(){ //When not users turn, remove listeners so buttons can't be clicked
 		for (int x = 0; x < grid.length; x++){
 			for (int y = 0; y < grid[x].length; y++){
@@ -153,6 +170,7 @@ public class Main implements ActionListener {
 		}
 	}
 
+	//Adds button listeners to grid
 	public void addButtonListeners(){ //add button listeners
 		for (int x = 0; x < grid.length; x++){
                         for (int y = 0; y < grid[x].length; y++){
@@ -161,6 +179,4 @@ public class Main implements ActionListener {
                 }
 
 	}
-
-
 }

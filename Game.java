@@ -2,12 +2,17 @@ import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/* GAME CLASS
+ * - Handles each specific game
+ * - Created from Server Class
+ */
+
 public class Game {
 	public ClientHandler[] clients;
 	public String[][] grid = new String[19][19];
-	
 	public Lock lock = new ReentrantLock();
 
+	//Constructor
 	public Game(ClientHandler[] clients){
 		this.clients = clients;
 
@@ -16,6 +21,7 @@ public class Game {
 		}
 	}
 
+	//Starts game
 	public void startGame(){
 		clients[0].clients = clients;
                 clients[1].clients = clients;

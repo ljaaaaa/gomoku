@@ -5,6 +5,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+/* CLIENTHANDLER CLASS
+ * - Handles one client for Game Class
+ * - Communicates between Main Class and Game Class
+ * - Checks for game win
+ */
+
 public class ClientHandler implements Runnable{
 	private Socket socket;
 	public BufferedReader br;
@@ -15,6 +21,7 @@ public class ClientHandler implements Runnable{
 	public String player;
 	public ClientHandler[] clients;
 
+	//Constructor
 	public ClientHandler(String player, Game game, Socket socket) throws IOException{
 		this.socket = socket;
 		this.game = game;
@@ -26,19 +33,24 @@ public class ClientHandler implements Runnable{
 	}
 
 	@Override
+	//Thread that runs ClientHandler for one player
 	public void run() {
 		try {
 			while (true) {
 				String msgFromClient = br.readLine();
-				if (msgFromClient == null) { //Disconnected from game
+				
+				//Disconnected from game
+				if (msgFromClient == null) {
 					break;
 				}
 
+				//Turn finished
 				if (msgFromClient.equals("TURN DONE")){
 					int posX = Integer.parseInt(br.readLine());
 					int posY = Integer.parseInt(br.readLine());
 
-					try { //update game grid
+					//Update game grid
+					try {
 						game.lock.lock();
 						game.grid[posX][posY] = player;
 					} finally {
@@ -47,14 +59,16 @@ public class ClientHandler implements Runnable{
 
 					sendMessageToOther("UPDATE GRID");
 					sendMessage("UPDATE GRID");
-					for (int x = 0; x < game.grid.length; x++){ //send entire grid over to user
+					
+					//Send entire grid to both players
+					for (int x = 0; x < game.grid.length; x++){
 						for (int y = 0; y < game.grid[x].length; y++){
 							sendMessage(game.grid[x][y]);
 							sendMessageToOther(game.grid[x][y]);
 						}
 					}
 
-					//after sned changed square
+					//Send recently changed square
 					sendMessage(String.valueOf(posX));
 					sendMessage(String.valueOf(posY));
 					sendMessage(player);
@@ -63,22 +77,24 @@ public class ClientHandler implements Runnable{
 					sendMessageToOther(String.valueOf(posY));
 					sendMessageToOther(player);
 
-					if (checkWin()){ //Game over
+					//Game over - win
+					if (checkWin()){
 						sendMessage("RESULTS");
 						sendMessage(player);
 
 						sendMessageToOther("RESULTS");
 						sendMessageToOther(player);
 
-					} else if (checkDraw()) { //Game over
+					} //Game over - draw
+					else if (checkDraw()) {
 						sendMessage("RESULTS");
                                                 sendMessage("draw");
 
                                                 sendMessageToOther("RESULTS");
                                                 sendMessageToOther("draw");
-					}
-						       
-					else { //Game continues
+					
+					} //Game continues
+					else {
 						sendMessageToOther("TURN");
 					}
 				}
@@ -88,17 +104,21 @@ public class ClientHandler implements Runnable{
 			socket.close();
 			br.close();
 			bw.close();
-		} catch (IOException e) { } //Connection reset
+		//Connection reset	
+		} catch (IOException e) { }
 	}
 
+	//Sends message to player
 	public void sendMessage(String message){
 		try {
 			bw.write(message);
 	                bw.newLine();
         	        bw.flush();
-		} catch (IOException e){ } //stream has closed and messages can't be sent
+		//Stream closed
+		} catch (IOException e){ }
 	}
 
+	//Sends message to other player
 	public void sendMessageToOther(String message){
 		for (int x = 0; x < clients.length; x++){
 			if (clients[x] != this){
@@ -108,6 +128,7 @@ public class ClientHandler implements Runnable{
 		}
 	}
 
+	//Checks for draw
 	public boolean checkDraw(){
 		String[][] g = game.grid;
 
@@ -121,12 +142,14 @@ public class ClientHandler implements Runnable{
 		return true;
 	}
 
-	public boolean checkWin(){ //check if player has won
+	//Checks if player has won
+	public boolean checkWin(){
 		String[][] g = game.grid;
 
 		for (int x = 0; x < g.length; x++){
 			for (int y = 0; y < g.length; y++){
-				if (y+4 < 19 && g[x][y] == player && //check column 
+				//Column
+				if (y+4 < 19 && g[x][y] == player && 
 					g[x][y+1] == player && 
 					g[x][y+2] == player && 
 					g[x][y+3] == player &&
@@ -134,8 +157,8 @@ public class ClientHandler implements Runnable{
 
 					return true;
 				}
-
-				if (x+4 < 19 && g[x][y] == player && //check row
+				//Row
+				if (x+4 < 19 && g[x][y] == player &&
                                 	g[x+1][y] == player &&
                                         g[x+2][y] == player &&
                                         g[x+3][y] == player &&
@@ -143,8 +166,8 @@ public class ClientHandler implements Runnable{
 
                                         return true;
                                 }
-
-				if (x+4 < 19 && y+4 < 19 && //check diagonal up
+				//Diagonal up
+				if (x+4 < 19 && y+4 < 19 &&
 					g[x][y] == player &&
                                         g[x+1][y+1] == player &&
                                         g[x+2][y+2] == player &&
@@ -153,8 +176,8 @@ public class ClientHandler implements Runnable{
 
                                         return true;
 				}
-					
-				if (x+4 < 19 && y-4 > 0 && //check diagonal down
+				//Diagonal down
+				if (x+4 < 19 && y-4 > 0 &&
 					g[x][y] == player &&
                                         g[x+1][y-1] == player &&
                                         g[x+2][y-2] == player &&

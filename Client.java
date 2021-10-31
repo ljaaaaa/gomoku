@@ -5,31 +5,37 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+/* CLIENT CLASS
+ * - Used to connect to server from Main Class
+ * - Sends messages to ClientHandler Class
+ */
+
 public class Client {
+	public final String IPADDRESS = "10.0.0.185"; //Change your IP Address here
+
 	public Socket socket;
 	public BufferedReader br;
 	public BufferedWriter bw;
 	public Main main;
    	public boolean connected = false;
 
+	//Constructor
     	public Client(Main main) {
 		this.main = main;
 		try { 
-                	socket = new Socket("10.0.0.185", 1234);
+                	socket = new Socket(IPADDRESS, 2021);
                 	br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 	bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                 	connected = true;
 	       	} catch (IOException e) { }
 	}
 
+	//Sends message to ClientHandler Class
     	public void sendMessage(String message) {
 		try {
     			bw.write(message);
 			bw.newLine();
                 	bw.flush();
-                } catch (IOException e) {
-			System.out.println("ERROR SENDING MESSAGE");
-                    	e.printStackTrace();
-                }
+                } catch (IOException e) { }
     	}
 }
