@@ -1,6 +1,5 @@
 # Gomoku
-![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/_tile.png) ![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/_tile.png)
-![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/_tile.png) ![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/_tile.png) ![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/_tile.png)
+![alt text](https://github.com/LiljaKiiski/Gomoku/blob/master/images/cover.png)
 
 Play a simple game of five in a row!
 
