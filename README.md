@@ -1,7 +1,7 @@
 # Gomoku
 ![alt text](https://github.com/LiljaKiiski/gomoku/blob/master/images/cover.png)
 
-Play a simple game of five in a row!
+Play a game of gomoku with a friend!
 
 # Set Up
 1. Download and unzip files
