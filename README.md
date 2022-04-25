@@ -6,7 +6,7 @@ Play a game of gomoku with a friend!
 # Set Up
 1. Download and unzip files
 2. Change variable "IPADDRESS" in Client Class to the ip address of the computer you plan to run server on
-3.  Run ./compile.sh or manually compile all classes with java
+3.  Run ./compile.sh or manually compile all classes with javac
 
 # Play
 1. Make sure files are set up on computer/s you are playing on
