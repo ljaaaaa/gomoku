@@ -1,4 +1,4 @@
-# Gomoku
+# gomoku
 ![alt text](https://github.com/LiljaKiiski/gomoku/blob/master/images/cover.png)
 
 Play a game of gomoku with a friend!
