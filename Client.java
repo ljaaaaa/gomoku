@@ -11,7 +11,7 @@ import java.net.Socket;
  */
 
 public class Client {
-	public final String IPADDRESS = "10.0.0.185"; //Change your IP Address here
+	public final String IPADDRESS = "localhost"; //Change your IP Address here
 
 	public Socket socket;
 	public BufferedReader br;

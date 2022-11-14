@@ -1,5 +1,5 @@
 # gomoku
-![alt text](https://github.com/LiljaKiiski/gomoku/blob/master/images/cover.png)
+![alt text](https://github.com/LiljaKiiski/gomoku/blob/master/bin/images/cover.png)
 
 Play a game of gomoku with a friend!
 
